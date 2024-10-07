@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>キャッシュレスセルフベンダー向け QR生成ツール</title>
+	<meta name="description" content="QR生成ツール">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="jquery-3.6.3.min.js"></script> 
+	<script src="jquery.qrcode.min.js"></script> 
+	<script src="encoding.js"></script> 
+	<style type="text/css">
+	<!--
+	main {
+		font-size: 1em;
+	}
+	.b_base {
+		font-family: inherit;
+		font-size: inherit;
+		text-align: center;
+		vertical-align: middle;
+		text-decoration: none;
+		margin: auto;
+		padding: 0.3rem 2rem;
+		font-weight: bold;
+		background: linear-gradient(to top, rgb(5, 130, 174), #27acd9);
+		color: #fff;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+		-webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+		transition: 0.5s;
+		border-radius: 10px;/*角丸*/
+		cursor        : pointer;           /* カーソル  */
+	}
+	.b_base:hover {
+		color: #fff;
+		opacity: 0.5;
+	}
+	.b_print {
+		font-size: 1.3em;
+		padding: 1rem 4rem;
+	}
+	.b_noevents {
+		pointer-events: none;
+		background: linear-gradient(to top, gray, silver);
+	}
+	.date_base {
+		font-family: inherit;
+		font-size: inherit;
+	}
+	.inline_block{
+		display: block;
+//		background: steelblue;
+		letter-spacing: normal;
+//		vertical-align: top;
+		margin: 0px 10px;
+		width: 630px;
+	}
+	.t_base {
+		background: whitesmoke;/*背景色*/
+		border-radius: 5px;/*角丸*/
+		font-size: inherit;
+		font-family: inherit;
+		border: 2px solid black;
+	}
+	.t_base:focus {
+		border-coloer: blue;
+	}
+	.t_item_name {
+		width: 520px;
+		ime-mode: active;
+	}
+	.t_item_desc {
+		width: 520px;
+		height: 80px;
+		resize:none;
+		ime-mode: active;
+	}
+	.t_item_price {
+		width: 65px;
+		ime-mode: disabled;
+	}
+	.t_rate {
+		width: 32px;
+		ime-mode: disabled;
+	}
+	.no_spin::-webkit-inner-spin-button,
+	.no_spin::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+		-moz-appearance:textfield;
+	}
+	.store_name {
+		font-size: 1.3em;
+	}
+	.history_list_container {
+		overflow-y: scroll;
+		height: 300px;
+		margin: 0 auto;
+		border: 1px solid black;
+		background: whitesmoke;/*背景色*/
+	}
+	.history_list {
+		margin         : auto;
+		border-collapse: collapse;
+//		border: solid 2px gray;
+		background     : #ffffff;
+		color: #black;
+		background: whitesmoke;/*背景色*/
+		line-height: 1.5;
+		padding: 0px;
+		width: 100%;
+	}
+	.history_list_item_name {
+		font-size: 0.8em;
+		text-align: left;
+		padding       : 1px 5px;
+//		border-left: solid 6px #2d8fdd;/*左側の線*/
+//		border-left: solid 6px orange;/*左側の線*/
+//		border-bottom: solid 3px white;/*下のバーとの余白*/
+//		border-radius: 0 15px 15px 0;/*右側の角だけ丸く*/
+//		border-radius: 15px 0 0 15px;/*左側の角だけ丸く*/
+//		cursor        : pointer;           /* カーソル  */
+		cursor        : default;           /* カーソル  */
+	}
+	.history_list_item_price {
+		font-size: 0.8em;
+		text-align: right;
+		padding       : 1px 5px;
+		border-left: none 0px whitesmoke;/*左側の線*/
+//		border-bottom: solid 3px white;/*下のバーとの余白*/
+//		border-radius: 0 15px 15px 0;/*右側の角だけ丸く*/
+//		cursor        : pointer;           /* カーソル  */
+		cursor        : default;           /* カーソル  */
+	}
+	 /* --- 明細のｎ行にカーソルが乗ったとき ---------- */
+	.histroy_list tr:hover {
+//		background    : Highlight !important;           /* 背景色    */
+	}
+	.store_list_container {
+		overflow-y: scroll;
+//		height: 300px;
+		margin: 0 auto;
+		border: 1px solid black;
+		background: whitesmoke;/*背景色*/
+	}
+	.store_list {
+		margin         : auto;
+		border-collapse: collapse;
+//		border: solid 2px gray;
+		background     : #ffffff;
+		color: #black;
+		background: whitesmoke;/*背景色*/
+		line-height: 1.5;
+		padding: 0px;
+		width: 100%;
+	}
+	.store_list_site_code {
+		font-size: 0.8em;
+		text-align: left;
+		padding       : 1px 5px;
+//		border-left: solid 6px #2d8fdd;/*左側の線*/
+//		border-left: solid 6px orange;/*左側の線*/
+//		border-bottom: solid 3px white;/*下のバーとの余白*/
+//		border-radius: 0 15px 15px 0;/*右側の角だけ丸く*/
+//		border-radius: 15px 0 0 15px;/*左側の角だけ丸く*/
+//		cursor        : pointer;           /* カーソル  */
+		cursor        : default;           /* カーソル  */
+	}
+	.store_list_store_name {
+		font-size: 0.8em;
+		text-align: left;
+		padding       : 1px 5px;
+		border-left: none 0px whitesmoke;/*左側の線*/
+//		border-bottom: solid 3px white;/*下のバーとの余白*/
+//		border-radius: 0 15px 15px 0;/*右側の角だけ丸く*/
+//		cursor        : pointer;           /* カーソル  */
+		cursor        : default;           /* カーソル  */
+	}
+	 /* --- 明細のｎ行にカーソルが乗ったとき ---------- */
+	.store_list tr:hover {
+//		background    : Highlight !important;           /* 背景色    */
+	}
+	body{margin:0;padding:0;}
+	/* テキストボックスを隠す */
+	div{background:white;}
+	#table_event_shifter{
+		position:absolute;
+		z-index: -10;
+		height:0;
+		top: -10px;
+	}
+	/* 行の選択色 */
+	.selected {
+		background:#2d8fdd;
+		color:white;
+	}
+
+	/* 入力エリア無効時背景色 */
+	[inert] {
+		& :is(input, select) {
+			background: gray;
+		}
+	}
+
+	.toggle_button {
+		display: flex;
+		align-items: center;
+		position: relative;
+		width: 80px;
+		height: 25px;
+		border-radius: 50px;
+		box-sizing: content-box;
+		background-color: whitesmoke;
+		cursor: pointer;
+		transition: background-color .4s;
+	}
+	.toggle_button:has(:checked) {
+		background-color:   #75bbff33;
+	}
+	.toggle_button::before {
+		position: absolute;
+		left: 0px;
+		width: 40px;
+		height: 25px;
+		border-radius: 50%;
+		background-color: #d0cdcd;
+		content: '';
+		transition: left .4s;
+	}
+	.toggle_button:has(:checked)::before {
+		left: 40px;
+		background-color:  #2d8fdd;//#75bbff;
+	}
+	.toggle_button::after {
+		position: absolute;
+		left: 20px;
+		transform: translateX(-50%);
+		color: #fff;
+		font-weight: 600;
+		font-size: .9em;
+		content: 'OFF';
+		transition: left .4s;
+	}
+	.toggle_button:has(:checked)::after {
+		left: 60px;
+		content: 'ON';
+	}
+	.toggle_button input {
+		display: none;
+	}
+
+	.display_none {
+		display: none;
+	}
+	.display_table {
+		display: table;
+	}
+
+	.modal-overlay{
+	   visibility: hidden;
+	   position: fixed;
+	   left: 0;
+	   top: 0;
+	   width: 100vw;
+	   height: 100vh;
+	   background-color: rgba(0,0,0,.7);
+	   z-index: 999;
+	  transition: .3s;
+	  opacity:0;
+	}
+	.modal-overlay.active{
+	   visibility: visible;
+	   transition: .3s;
+	   opacity: 1;
+	}
+	.modal-window{
+	   position: absolute;
+	   top: 50%;
+	   left: 50%;
+	   transform: translate(-50%,-50%);
+	   background-color: #fff;
+	   width: 80%;
+	   max-width: 900px;
+	   height: 500px;
+	   margin: 0;
+	   padding: 30px;
+	   overflow-y: auto;
+	}
+	#b_close_store_list {
+	    position: absolute;
+	    width: 20px;
+	    height: 20px;
+	    top: 10px;
+	    right: 10px;
+	}
+	#b_close_store_list::before {
+	   content: '';
+	   position: absolute;
+	   top: 50%;
+	   left: 50%;
+	   width: 25px;
+	   height: 1px;
+	   background-color: #000;
+	   transform: translate(-50%, -50%) rotate(45deg);
+	}
+	#b_close_store_list::after {
+	   content: '';
+	   position: absolute;
+	   top: 50%;
+	   left: 50%;
+	   width: 25px;
+	   height: 1px;
+	   background-color: #000;
+	   transform: translate(-50%, -50%) rotate(-45deg);
+	}
+	#b_close_qrcode {
+	    position: absolute;
+	    width: 20px;
+	    height: 20px;
+	    top: 10px;
+	    right: 10px;
+	}
+	#b_close_qrcode::before {
+	   content: '';
+	   position: absolute;
+	   top: 50%;
+	   left: 50%;
+	   width: 25px;
+	   height: 1px;
+	   background-color: #000;
+	   transform: translate(-50%, -50%) rotate(45deg);
+	}
+	#b_close_qrcode::after {
+	   content: '';
+	   position: absolute;
+	   top: 50%;
+	   left: 50%;
+	   width: 25px;
+	   height: 1px;
+	   background-color: #000;
+	   transform: translate(-50%, -50%) rotate(-45deg);
+	}
+	.modal-opened {
+	    overflow-y: hidden; /*背景を固定*/
+	}
+	@media screen and (max-width: 900px) {
+	#prev, #next {
+	    width: 40px;
+	    height: 40px;
+	    top: 114%;
+	}
+	#prev{
+	left: 35%;
+	}
+	#next{
+	right: 35%;
+	}
+	}
+-->
+	</style>
+</head>
+<body>
+	<header></header>
+	<nav></nav>
+	<!----- /header ----->
+
+	<!----- main ----->
+	<main>
+	<div class="inline_block">
+	<table><tr>
+	<td></td><td>
+	<span class="store_name">店舗：<span id="t_store_name">ヴィド・フランス</span></span>
+	<input type="text" id="t_store_name" value="ヴィド・フランス" style="display: none;">
+	<input type="text" id="t_site_code" value="000836" style="display: none;">
+	</td>
+	<td></td>
+	<td><a class="b_base" id="b_goback_store_select">店舗を選択する</a></td>
+	</tr></table>
+	<hr>
+	</div>
+
+	<div class="inline_block">
+	<table>
+	<tr><td>商品名：</td><td colspan="2"><input type="text" id="t_item_name" maxlength="32" class="t_base t_item_name" onfocus="setImeOn()" oninput="convHanToZen(this);" spellcheck="false"></input></td></tr>
+	<tr><td></td></tr>
+	<tr><td>商品説明：</td><td colspan="2"><textarea id="t_item_desc" name="t_item_desc" maxlength="64" class="t_base t_item_desc" onfocus="setImeOn()" oninput="convHanToZen(this);" spellcheck="false"></textarea></input></td></tr>
+	<tr><td></td></tr>
+	<tr><td>商品価格：</td><td width="10px"><input type="number" id="t_item_price" maxlength="5" class="t_base t_item_price no_spin" min="1" max="99999" onfocus="setImeOff()" oninput="priceCheck(this);" /></td><td>円</td></tr>
+	</table>
+	<br>
+
+	<table><tr><td>売り止め設定</td><td></td><td><label class="toggle_button"><input type="checkbox" id="r_has_expiration_date" onchange="changHasExpirationDate(event);" /></label></td></tr></table>
+	<fieldset style="border: 1px solid #000000; padding: 5px 10px;">
+
+	<table>
+
+	<tr><td>
+	<table id="expiration_date_type_select_container"><tr><td>
+	<select id="s_expiration_date_type" class="t_base" onchange="changeExpirationDateType();">
+		<option value="0">指定した日時になったら売り止め</option>
+		<option value="1">入庫してから指定した日時が経過したら売り止め</option>
+		<option value="2">毎日指定した時刻になったら売り止め</option>
+	</select>
+	</td><tr>
+	</table>
+	</td></tr>
+
+	<!-- 指定した日時になったら売り止め選択時の入力エリア -->
+	<tr><td align="right">
+	<table id="expiration_date_container"><tr><td>
+	<input type="date" id="d_expiration_date" class="t_base date_base" onkeydown="disableBSDELKey(event)" /></td><td>日</td><td></td>
+	<td>
+	<select id="s_expiration_date_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時</td><td></td>
+	<td>
+	<select id="s_expiration_date_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分</td>
+	</tr></table>
+	</td></tr>
+
+	<!-- 入庫してから指定した日時が経過したら売り止め選択時の入力エリア -->
+	<tr><td align="right">
+	<table id="expiration_after_date_container"><tr>
+	<td>
+	<select id="s_expiration_after_date_day" class="t_base date_base">
+		<option value="00">0</option>
+		<option value="01">1</option>
+		<option value="02">2</option>
+		<option value="03">3</option>
+		<option value="04">4</option>
+		<option value="05">5</option>
+		<option value="06">6</option>
+		<option value="07">7</option>
+		<option value="08">8</option>
+		<option value="09">9</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+		<option value="60">60</option>
+		<option value="61">61</option>
+		<option value="62">62</option>
+		<option value="63">63</option>
+		<option value="64">64</option>
+		<option value="65">65</option>
+		<option value="66">66</option>
+		<option value="67">67</option>
+		<option value="68">68</option>
+		<option value="69">69</option>
+		<option value="70">70</option>
+		<option value="71">71</option>
+		<option value="72">72</option>
+		<option value="73">73</option>
+		<option value="74">74</option>
+		<option value="75">75</option>
+		<option value="76">76</option>
+		<option value="77">77</option>
+		<option value="78">78</option>
+		<option value="79">79</option>
+		<option value="80">80</option>
+		<option value="81">81</option>
+		<option value="82">82</option>
+		<option value="83">83</option>
+		<option value="84">84</option>
+		<option value="85">85</option>
+		<option value="86">86</option>
+		<option value="87">87</option>
+		<option value="88">88</option>
+		<option value="89">89</option>
+		<option value="90">90</option>
+		<option value="91">91</option>
+		<option value="92">92</option>
+		<option value="93">93</option>
+		<option value="94">94</option>
+		<option value="95">95</option>
+		<option value="96">96</option>
+		<option value="97">97</option>
+		<option value="98">98</option>
+		<option value="99">99</option>
+	</select>
+	</td><td>日</td><td></td>
+	<td>
+	<select id="s_expiration_after_date_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時間</td><td></td>
+	<td>
+	<select id="s_expiration_after_date_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分後</td>
+	</tr></table>
+	</td></tr>
+
+	<!-- 毎日指定した時刻になったら売り止め選択時の入力エリア -->
+	<tr><td align="right">
+	<table id="expiration_everyday_container"><tr>
+	<td>
+	<select id="s_expiration_everyday_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時</td><td></td>
+	<td>
+	<select id="s_expiration_everyday_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分</td>
+	</tr></table>
+	</td></tr>
+	</table>
+	</fieldset>
+	<br>
+
+	<table><tr><td>値下げ設定</td><td></td><td><label class="toggle_button"><input type="checkbox" id="r_has_discount_date" onchange="changHasDiscountDate(event);" /></label></td></tr></table>
+	<fieldset style="border: 1px solid #000000; padding: 5px 10px;">
+
+	<table id="discount_date_type_select_container"><tr><td>
+	<select id="s_discount_date_type" class="t_base" onchange="changeDiscountDateType();">
+		<option value="0">指定した日時になったら値下げ</option>
+		<option value="1">入庫してから指定した日時が経過したら値下げ</option>
+		<option value="2">毎日指定した時刻になったら値下げ</option>
+	</select>
+	</td><tr></table>
+
+	<!-- 指定した日時になったら値下げ選択時の入力エリア -->
+	<table id="discount_date_container"><tr><td>
+	<input type="date" id="d_discount_date" class="t_base date_base"onkeydown="disableBSDELKey(event)" /></td><td>日</td><td></td>
+	<td>
+	<select id="s_discount_date_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時</td><td></td>
+	<td>
+	<select id="s_discount_date_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分</td>
+	</tr></table>
+
+	<!-- 入庫してから指定した日時が経過したら値下げ選択時の入力エリア -->
+	<table id="discount_after_date_container"><tr>
+	<td>
+	<select id="s_discount_after_date_day" class="t_base date_base">
+		<option value="00">0</option>
+		<option value="01">1</option>
+		<option value="02">2</option>
+		<option value="03">3</option>
+		<option value="04">4</option>
+		<option value="05">5</option>
+		<option value="06">6</option>
+		<option value="07">7</option>
+		<option value="08">8</option>
+		<option value="09">9</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+		<option value="60">60</option>
+		<option value="61">61</option>
+		<option value="62">62</option>
+		<option value="63">63</option>
+		<option value="64">64</option>
+		<option value="65">65</option>
+		<option value="66">66</option>
+		<option value="67">67</option>
+		<option value="68">68</option>
+		<option value="69">69</option>
+		<option value="70">70</option>
+		<option value="71">71</option>
+		<option value="72">72</option>
+		<option value="73">73</option>
+		<option value="74">74</option>
+		<option value="75">75</option>
+		<option value="76">76</option>
+		<option value="77">77</option>
+		<option value="78">78</option>
+		<option value="79">79</option>
+		<option value="80">80</option>
+		<option value="81">81</option>
+		<option value="82">82</option>
+		<option value="83">83</option>
+		<option value="84">84</option>
+		<option value="85">85</option>
+		<option value="86">86</option>
+		<option value="87">87</option>
+		<option value="88">88</option>
+		<option value="89">89</option>
+		<option value="90">90</option>
+		<option value="91">91</option>
+		<option value="92">92</option>
+		<option value="93">93</option>
+		<option value="94">94</option>
+		<option value="95">95</option>
+		<option value="96">96</option>
+		<option value="97">97</option>
+		<option value="98">98</option>
+		<option value="99">99</option>
+	</select>
+	</td><td>日</td><td></td>
+	<td>
+	<select id="s_discount_after_date_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時間</td><td></td>
+	<td>
+	<select id="s_discount_after_date_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分後</td>
+	</tr></table>
+
+	<!-- 毎日指定した時刻になったら値下げ選択時の入力エリア -->
+	<table id="discount_everyday_container"><tr>
+	<td>
+	<select id="s_discount_everyday_hour" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+	</select>
+	</td>
+	<td>時</td><td></td>
+	<td>
+	<select id="s_discount_everyday_min" class="t_base date_base">
+		<option value="00">00</option>
+		<option value="01">01</option>
+		<option value="02">02</option>
+		<option value="03">03</option>
+		<option value="04">04</option>
+		<option value="05">05</option>
+		<option value="06">06</option>
+		<option value="07">07</option>
+		<option value="08">08</option>
+		<option value="09">09</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+		<option value="16">16</option>
+		<option value="17">17</option>
+		<option value="18">18</option>
+		<option value="19">19</option>
+		<option value="20">20</option>
+		<option value="21">21</option>
+		<option value="22">22</option>
+		<option value="23">23</option>
+		<option value="24">24</option>
+		<option value="25">25</option>
+		<option value="26">26</option>
+		<option value="27">27</option>
+		<option value="28">28</option>
+		<option value="29">29</option>
+		<option value="30">30</option>
+		<option value="31">31</option>
+		<option value="32">32</option>
+		<option value="33">33</option>
+		<option value="34">34</option>
+		<option value="35">35</option>
+		<option value="36">36</option>
+		<option value="37">37</option>
+		<option value="38">38</option>
+		<option value="39">39</option>
+		<option value="40">40</option>
+		<option value="41">41</option>
+		<option value="42">42</option>
+		<option value="43">43</option>
+		<option value="44">44</option>
+		<option value="45">45</option>
+		<option value="46">46</option>
+		<option value="47">47</option>
+		<option value="48">48</option>
+		<option value="49">49</option>
+		<option value="50">50</option>
+		<option value="51">51</option>
+		<option value="52">52</option>
+		<option value="53">53</option>
+		<option value="54">54</option>
+		<option value="55">55</option>
+		<option value="56">56</option>
+		<option value="57">57</option>
+		<option value="58">58</option>
+		<option value="59">59</option>
+	</select>
+	</td>
+	<td>分</td>
+	</tr></table>
+
+	<table id="item_price_discount_type_select_container"><tr><td>
+	<select id="s_item_price_discount_type" class="t_base" onchange="changeItemPriceDiscountType();">
+		<option value="0">指定した金額に値下げ</option>
+		<option value="1">指定した割引率で値下げ</option>
+	</select>
+	</td><tr></table>
+
+	<!-- 指定した金額に値下げ選択時の入力エリア -->
+	<table id="item_price_discount_container"><tr>
+	<td><input type="number" id="t_item_price_discount" maxlength="5" class="t_base t_item_price no_spin" min="1" max="99999" onfocus="setImeOff()" oninput="priceCheck(this);" /></td><td>円</td>
+	</tr></table>
+
+	<!-- 指定した割引率で下げ選択時の入力エリア -->
+	<table id="item_price_discount_rate_container"><tr>
+	<td><input type="number" id="t_item_price_discount_rate" maxlength="2" class="t_base t_rate no_spin" min="1" max="99" onfocus="setImeOff()" oninput="discountRateCheck(this);" /></td><td>％引き</td>
+	</tr></table>
+
+	</fieldset>
+	</div>
+
+	<br>
+	<div class="inline_block">
+	<a class="b_base b_print" id="b_print_label" onclick="makeQR()">QR生成</a>
+	<br><br>
+	</div>
+
+	<div class="modal-overlay" id="modal_histroy_list">
+	<div class="modal-window">
+	<button id="b_close_history_list" aria-label="閉じる"></button>
+	<table width="100%"><tr><td>履歴から探す</td><td align="right"><a class="b_base" id="b_delete_history">削除</a> <a class="b_base" id="b_select_history">選択</a></td></tr><tr><td><td></tr></table>
+	<div class="history_list_container" id="history_list_container">
+	<table class="history_list" id="history_list">
+	</table>
+	</div>
+	</div>
+	</div>
+
+	<div class="modal-overlay" id="modal_store_list">
+	<div class="modal-window">
+	<button id="b_close_store_list" aria-label="閉じる"></button>
+	<table width="100%"><tr><td>店舗を選択する</td><td align="right"><a class="b_base" id="b_add_store">追加</a> <a class="b_base" id="b_delete_store">削除</a> <a class="b_base" id="b_select_store">選択</a></td></tr><tr><td><td></tr></table>
+	<div class="store_list_container" id="store_list_container">
+	<table class="store_list" id="store_list">
+	</table>
+	</div>
+	</div>
+	</div>
+
+	<div class="modal-overlay" id="modal_qrcode">
+	<div class="modal-window">
+	<div align="center" width="100%">
+	<button id="b_close_qrcode" aria-label="閉じる"></button>
+	<div id="img-qr">
+	</div>
+	<div id="qrcode_desc" align="left" style="width: 300px; padding:10px;">
+	定価：<span id="qrcode_price">1000円（950円）</span><br>
+	販売期限：<span id="qrcode_limit">2024/01/24 18:35</span><br>
+	<span id="qrcode_item_desc">カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。深みのある味わいが、カスタードにの素直な美味しさのアクセントに。<span></br>
+	</div>
+	</div>
+	</div>
+	</div>
+
+	<input id="sampleText" type="text"><input type="button" value="記憶" onclick="saveSample()"><input type="button" value="復元" onclick="loadSample()">
+
+	</main>
+	<!----- /main ----->
+
+	<!----- footer ----->
+	<footer></footer>
+	<!----- /footer ----->
+	<script lan>
+	// クリック時、行選択(ヘッダ除く)
+	function selectRow() {
+		// 選択されている他の行があれば選択解除
+		for (const child of this.parentElement.children) {
+			child.classList.remove("selected");
+		}
+		// クリックされた行を選択
+		this.classList.add("selected");
+		if (document.getElementById("history_list_container").scrollTop > this.offsetTop) {
+			document.getElementById("history_list_container").scrollTop = this.offsetTop;
+		}
+		if (document.getElementById("history_list_container").scrollTop + document.getElementById("history_list_container").clientHeight < this.offsetTop + this.clientHeight) {
+			document.getElementById("history_list_container").scrollTop = this.offsetTop - document.getElementById("history_list_container").clientHeight + this.clientHeight;
+		}
+	};
+
+	//金額入力最大桁チェック
+	//最大5桁に制限する
+	function priceCheck(e) {
+		e.value = e.value.slice(0, 5);
+	}
+	//割引率入力最大桁チェック
+	//最大2桁に制限する
+	function discountRateCheck(e) {
+		e.value = e.value.slice(0, 2);
+	}
+
+	//全角文字以外除外チェック
+	//全角文字以外を制限する
+	function restrictNonJapaneseInput(e) {
+		let regex = /[\u3000-\u303F\u3040-\u309F\u30A0-\u30FF\uFF00-\uFF9F\u4E00-\u9FFF]/;
+		let inputChar = String.fromCharCode(e.charCode);
+
+		if (!regex.test(inputChar)) {
+			e.preventDefault();
+		}
+	}
+
+	//売り止め設定ON/OFF変更イベント処理
+	//OFF時に入力エリアを初期化＆無効化する
+	function changHasExpirationDate(e) {
+		if (document.getElementById("r_has_expiration_date").checked == false) {
+
+			document.getElementById("expiration_date_type_select_container").setAttribute("inert", "");
+			document.getElementById("expiration_date_container").setAttribute("inert", "");
+			document.getElementById("expiration_after_date_container").setAttribute("inert", "");
+			document.getElementById("expiration_everyday_container").setAttribute("inert", "");
+
+			document.getElementById("s_expiration_date_type").options[0].selected = true;
+			document.getElementById("s_expiration_date_type").dispatchEvent(new Event('change'));
+
+			var date = new Date();
+			document.getElementById("d_expiration_date").value = date.getFullYear() + '-' + ("0"+(date.getMonth()+1)).slice(-2) + '-' + ("0"+(date.getDate())).slice(-2);
+			document.getElementById("s_expiration_date_hour").options[0].selected = true;
+			document.getElementById("s_expiration_date_min").options[0].selected = true;
+
+			document.getElementById("s_expiration_after_date_day").options[0].selected = true;
+			document.getElementById("s_expiration_after_date_hour").options[0].selected = true;
+			document.getElementById("s_expiration_after_date_min").options[0].selected = true;
+
+			document.getElementById("s_expiration_everyday_hour").options[0].selected = true;
+			document.getElementById("s_expiration_everyday_min").options[0].selected = true;
+		}
+		else {
+			document.getElementById("expiration_date_type_select_container").removeAttribute("inert", "");
+			document.getElementById("expiration_date_container").removeAttribute("inert", "");
+			document.getElementById("expiration_after_date_container").removeAttribute("inert", "");
+			document.getElementById("expiration_everyday_container").removeAttribute("inert", "");
+		}
+	}
+
+	//売り止め設定日付タイプ変更イベント処理
+	//選択された日付タイプの入力エリアを表示する
+	function changeExpirationDateType(e) {
+		if (document.getElementById("s_expiration_date_type").options[0].selected == true) {
+			document.getElementById("expiration_date_container").style.display = "table";
+			document.getElementById("expiration_after_date_container").style.display = "none";
+			document.getElementById("expiration_everyday_container").style.display = "none";
+		}
+		else if (document.getElementById("s_expiration_date_type").options[1].selected == true) {
+			document.getElementById("expiration_date_container").style.display = "none";
+			document.getElementById("expiration_after_date_container").style.display = "table";
+			document.getElementById("expiration_everyday_container").style.display = "none";
+		}
+		else {
+			document.getElementById("expiration_date_container").style.display = "none";
+			document.getElementById("expiration_after_date_container").style.display = "none";
+			document.getElementById("expiration_everyday_container").style.display = "table";
+		}
+	}
+
+	//値下げ設定ON/OFF変更イベント処理
+	//OFF時に入力エリアを初期化＆無効化する
+	function changHasDiscountDate(e) {
+		if (document.getElementById("r_has_discount_date").checked == false) {
+			document.getElementById("discount_date_type_select_container").setAttribute("inert", "");
+			document.getElementById("discount_date_container").setAttribute("inert", "");
+			document.getElementById("discount_after_date_container").setAttribute("inert", "");
+			document.getElementById("discount_everyday_container").setAttribute("inert", "");
+			document.getElementById("item_price_discount_type_select_container").setAttribute("inert", "");
+			document.getElementById("item_price_discount_container").setAttribute("inert", "");
+			document.getElementById("item_price_discount_rate_container").setAttribute("inert", "");
+
+			document.getElementById("s_discount_date_type").options[0].selected = true;
+			document.getElementById("s_discount_date_type").dispatchEvent(new Event('change'));
+
+			var date = new Date();
+			document.getElementById("d_discount_date").value = date.getFullYear() + '-' + ("0"+(date.getMonth()+1)).slice(-2) + '-' + ("0"+(date.getDate())).slice(-2);
+			document.getElementById("s_discount_date_hour").options[0].selected = true;
+			document.getElementById("s_discount_date_min").options[0].selected = true;
+
+			document.getElementById("s_discount_after_date_day").options[0].selected = true;
+			document.getElementById("s_discount_after_date_hour").options[0].selected = true;
+			document.getElementById("s_discount_after_date_min").options[0].selected = true;
+
+			document.getElementById("s_discount_everyday_hour").options[0].selected = true;
+			document.getElementById("s_discount_everyday_min").options[0].selected = true;
+
+			document.getElementById("s_item_price_discount_type").options[0].selected = true;
+			document.getElementById("s_item_price_discount_type").dispatchEvent(new Event('change'));
+			document.getElementById("t_item_price_discount").value = "";
+			document.getElementById("t_item_price_discount_rate").value = "";
+		}
+		else {
+			document.getElementById("discount_date_type_select_container").removeAttribute("inert");
+			document.getElementById("discount_date_container").removeAttribute("inert");
+			document.getElementById("discount_after_date_container").removeAttribute("inert");
+			document.getElementById("discount_everyday_container").removeAttribute("inert");
+			document.getElementById("item_price_discount_type_select_container").removeAttribute("inert");
+			document.getElementById("item_price_discount_container").removeAttribute("inert");
+			document.getElementById("item_price_discount_rate_container").removeAttribute("inert");
+		}
+	}
+
+	//値下げ設定日付タイプ変更イベント処理
+	//選択された日付タイプの入力エリアを表示する
+	function changeDiscountDateType(e) {
+		if (document.getElementById("s_discount_date_type").options[0].selected == true) {
+			document.getElementById("discount_date_container").style.display = "table";
+			document.getElementById("discount_after_date_container").style.display = "none";
+			document.getElementById("discount_everyday_container").style.display = "none";
+		}
+		else if (document.getElementById("s_discount_date_type").options[1].selected == true) {
+			document.getElementById("discount_date_container").style.display = "none";
+			document.getElementById("discount_after_date_container").style.display = "table";
+			document.getElementById("discount_everyday_container").style.display = "none";
+		}
+		else {
+			document.getElementById("discount_date_container").style.display = "none";
+			document.getElementById("discount_after_date_container").style.display = "none";
+			document.getElementById("discount_everyday_container").style.display = "table";
+		}
+	}
+
+	//値下げ設定金額タイプ変更イベント処理
+	//選択された金額タイプの入力エリアを表示する
+	function changeItemPriceDiscountType(e) {
+		if (document.getElementById("s_item_price_discount_type").options[0].selected == true) {
+			document.getElementById("item_price_discount_container").style.display = "table";
+			document.getElementById("item_price_discount_rate_container").style.display = "none";
+		}
+		else {
+			document.getElementById("item_price_discount_container").style.display = "none";
+			document.getElementById("item_price_discount_rate_container").style.display = "table";
+		}
+	}
+
+	//半角to全角変換処理
+	//半角文字を全角に変換する
+	function convHanToZen(e) {
+		var str = e.value;
+		var selectionStart = e.selectionStart;
+		var selectionEnd = e.selectionEnd;
+
+//		str = str.replace( /[A-Za-z0-9-!"#$%&'()=<>,.?_\[\]{}@^~\\]/g, function(s) {
+		str = str.replace( /[A-Za-z0-9!"#$%&'\(\)*+,-.\/:;<=>?@\[\]^_`{|}~]/g, function(s) {
+			return String.fromCharCode(s.charCodeAt(0) + 65248);
+		});
+
+		str = str.replace("\\", "￥");
+		str = str.replace("\ ", "　");
+
+		str = str.replace("\n", function(s) {
+			selectionStart--;
+			return "";
+		});
+
+		if (selectionStart < 0) { selectionStart = 0; }
+
+		e.value = str;
+		e.selectionStart = selectionStart;
+		e.selectionEnd = e.selectionStart;
+	}
+
+	//[店舗を選択する]ボタン押しイベント処理
+	//店舗選択モーダルを表示
+	document.getElementById("b_goback_store_select").onclick = function(e) {
+		modal = document.getElementById('modal_store_list');
+		btnClose = document.getElementById('b_close_store_list');
+		modal.classList.add('active');
+		document.querySelector('body').classList.add('modal-opened');
+		btnClose.addEventListener('click', function() {
+			document.getElementById('modal_store_list').classList.remove('active');
+			document.querySelector('body').classList.remove('modal-opened'); 
+		}, false);
+	};
+
+	//[選択]ボタン押しイベント処理
+	//VSのFormにボタン押しを通知する
+	document.getElementById("b_select_history").onclick = function(e){
+		for (const obj of document.getElementById("history_list").rows) {
+			if (obj.classList.contains("selected")) {
+				let msg = { type: "selectHistory", msg: obj.id };
+				window.chrome.webview.postMessage(msg);
+				break;
+			}
+		}
+	};
+
+	//[削除]ボタン押しイベント処理
+	//VSのFormにボタン押しを通知する
+	document.getElementById("b_delete_history").onclick = function(e){
+		for (const obj of document.getElementById("history_list").rows) {
+			if (obj.classList.contains("selected")) {
+				let msg = { type: "deleteHistory", msg: obj.id };
+				window.chrome.webview.postMessage(msg);
+				break;
+			}
+		}
+	};
+
+	//入力エリア初期化処理
+	//入力エリアを初期化する
+	function resetInputData() {
+		document.getElementById("t_item_name").value = "";
+		document.getElementById("t_item_desc").value = "";
+		document.getElementById("t_item_price").value = "";
+		
+		document.getElementById("r_has_expiration_date").checked = false;
+		document.getElementById("r_has_expiration_date").dispatchEvent(new Event('change'));
+		
+		document.getElementById("r_has_discount_date").checked = false;
+		document.getElementById("r_has_discount_date").dispatchEvent(new Event('change'));
+	}
+
+	//入力エリア値セット処理
+	//入力エリアに指定した履歴の値をセットする
+	function setInputData(itemName, itemDesc, itemPrice, expirationDate, discountDate, itemPriceDiscount) {
+		//商品名
+		document.getElementById("t_item_name").value = itemName;
+		//商品説明
+		document.getElementById("t_item_desc").value = itemDesc.replace("#CR", "\n");
+		//商品価格
+		document.getElementById("t_item_price").value = itemPrice;
+
+		//売り止め設定
+		if (expirationDate == "000000000000") {
+			//売り止め設定OFF
+			document.getElementById("r_has_expiration_date").checked = false;
+			document.getElementById("r_has_expiration_date").dispatchEvent(new Event('change'));
+		}
+		else {
+			//売り止め設定ON
+			document.getElementById("r_has_expiration_date").checked = true;
+			document.getElementById("r_has_expiration_date").dispatchEvent(new Event('change'));
+
+			if (expirationDate.substr(0, 6) == "000000") {
+				//入庫してから指定した日時が経過したら売り止め
+				document.getElementById("s_expiration_date_type").options[1].selected = true;
+				document.getElementById("s_expiration_date_type").dispatchEvent(new Event('change'));
+
+				var day = expirationDate.substr(6, 2);
+				var hour = expirationDate.substr(8, 2);
+				var min = expirationDate.substr(10, 2);
+				document.getElementById("s_expiration_after_date_day").options[parseInt(day)].selected = true;
+				document.getElementById("s_expiration_after_date_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_expiration_after_date_min").options[parseInt(min)].selected = true;
+			}
+			else if (expirationDate.substr(0, 8) == "11111111") {
+				//毎日指定した時刻になったら売り止め
+				document.getElementById("s_expiration_date_type").options[2].selected = true;
+				document.getElementById("s_expiration_date_type").dispatchEvent(new Event('change'));
+
+				var hour = expirationDate.substr(8, 2);
+				var min = expirationDate.substr(10, 2);
+				document.getElementById("s_expiration_everyday_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_expiration_everyday_min").options[parseInt(min)].selected = true;
+			}
+			else {
+				//指定した日時になったら売り止め
+				document.getElementById("s_expiration_date_type").options[0].selected = true;
+				document.getElementById("s_expiration_date_type").dispatchEvent(new Event('change'));
+
+				var year = expirationDate.substr(0, 4);
+				var month = expirationDate.substr(4, 2);
+				var day = expirationDate.substr(6, 2);
+				var hour = expirationDate.substr(8, 2);
+				var min = expirationDate.substr(10, 2);
+				document.getElementById("d_expiration_date").value = year + '-' + month + '-' + day;
+				document.getElementById("s_expiration_date_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_expiration_date_min").options[parseInt(min)].selected = true;
+			}
+		}
+
+		//値下げ設定
+		if (discountDate == "000000000000") {
+			//値下げ設定OFF
+			document.getElementById("r_has_discount_date").checked = false;
+			document.getElementById("r_has_discount_date").dispatchEvent(new Event('change'));
+		}
+		else {
+			//値下げ設定ON
+			document.getElementById("r_has_discount_date").checked = true;
+			document.getElementById("r_has_discount_date").dispatchEvent(new Event('change'));
+
+			if (discountDate.substr(0, 6) == "000000") {
+				//入庫してから指定した日時が経過したら値下げ
+				document.getElementById("s_discount_date_type").options[1].selected = true;
+				document.getElementById("s_discount_date_type").dispatchEvent(new Event('change'));
+
+				var day = discountDate.substr(6, 2);
+				var hour = discountDate.substr(8, 2);
+				var min = discountDate.substr(10, 2);
+				document.getElementById("s_discount_after_date_day").options[parseInt(day)].selected = true;
+				document.getElementById("s_discount_after_date_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_discount_after_date_min").options[parseInt(min)].selected = true;
+			}
+			else if (discountDate.substr(0, 8) == "11111111") {
+				//毎日指定した時刻になったら値下げ
+				document.getElementById("s_discount_date_type").options[2].selected = true;
+				document.getElementById("s_discount_date_type").dispatchEvent(new Event('change'));
+
+				var hour = discountDate.substr(8, 2);
+				var min = discountDate.substr(10, 2);
+				document.getElementById("s_discount_everyday_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_discount_everyday_min").options[parseInt(min)].selected = true;
+			}
+			else {
+				//指定した日時になったら値下げ
+				document.getElementById("s_discount_date_type").options[0].selected = true;
+				document.getElementById("s_discount_date_type").dispatchEvent(new Event('change'));
+
+				var year = discountDate.substr(0, 4);
+				var month = discountDate.substr(4, 2);
+				var day = discountDate.substr(6, 2);
+				var hour = discountDate.substr(8, 2);
+				var min = discountDate.substr(10, 2);
+				document.getElementById("d_discount_date").value = year + '-' + month + '-' + day;
+				document.getElementById("s_discount_date_hour").options[parseInt(hour)].selected = true;
+				document.getElementById("s_discount_date_min").options[parseInt(min)].selected = true;
+			}
+
+			if (itemPriceDiscount.substr(0, 1) == "%") {
+				//指定した割引率で値下げ
+				document.getElementById("s_item_price_discount_type").options[1].selected = true;
+				document.getElementById("s_item_price_discount_type").dispatchEvent(new Event('change'));
+
+				document.getElementById("t_item_price_discount_rate").value = itemPriceDiscount.substr(1, 2);
+			}
+			else {
+				//指定した金額に値下げ
+				document.getElementById("s_item_price_discount_type").options[0].selected = true;
+				document.getElementById("s_item_price_discount_type").dispatchEvent(new Event('change'));
+
+				document.getElementById("t_item_price_discount").value = itemPriceDiscount;
+			}
+		}
+	}
+
+	resetInputData();
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "202401241835", "202401241500", "800");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "000000241835", "202401241545", "800");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "111111111948", "202401241545", "800");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "000000000000", "202401241545", "800");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "000000000000", "000000000000", "00000");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "202401241835", "202401241545", "700");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "202401241835", "000000101615", "700");
+//	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "202401241835", "111111111705", "600");
+	setInputData("ゴディパンのベルギーチョコレートのクリームパン（10個詰め）", "カスタードに混ぜ合わせた５５％のベルギー産チョコレート使用。#CR深みのある味わいが、カスタードにの素直な美味しさのアクセントに。", "1000", "202401241835", "111111111705", "%50");
+
+	function addHistory(itemId, itemName, itemPrice) {
+		var trElem = document.getElementById("history_list").insertRow(-1);
+		trElem.id = itemId;
+		trElem.onclick = selectRow;
+		var tdElemName = trElem.insertCell(-1);
+		tdElemName.appendChild(document.createTextNode(itemName));
+		tdElemName.classList.add("history_list_item_name");
+		var tdElemPrice = trElem.insertCell(-1);
+		tdElemPrice.appendChild(document.createTextNode(itemPrice));
+		tdElemPrice.classList.add("history_list_item_price");
+	}
+
+	function clearHistory() {
+		while (document.getElementById("history_list").rows.length != 0) {
+			document.getElementById("history_list").deleteRow(-1);
+		}
+	}
+
+	function disableHistoryButton() {
+		document.getElementById("b_delete_history").classList.add("b_noevents");
+		document.getElementById("b_select_history").classList.add("b_noevents");
+	}
+	function enableHistoryButton() {
+		document.getElementById("b_delete_history").classList.remove("b_noevents");
+		document.getElementById("b_select_history").classList.remove("b_noevents");
+	}
+
+	function addStore(siteCode, storeName) {
+		var trElem = document.getElementById("store_list").insertRow(-1);
+		trElem.id = siteCode;
+		trElem.onclick = selectRow;
+		var tdElemSiteCode = trElem.insertCell(-1);
+		tdElemSiteCode.appendChild(document.createTextNode(siteCode));
+		tdElemSiteCode.classList.add("store_list_store_name");
+		var tdElemName = trElem.insertCell(-1);
+		tdElemName.appendChild(document.createTextNode(storeName));
+		tdElemName.classList.add("store_list_store_name");
+	}
+
+	function clearStore() {
+		while (document.getElementById("store_list").rows.length != 0) {
+			document.getElementById("store_list").deleteRow(-1);
+		}
+	}
+
+	function disableStoreButton() {
+		document.getElementById("b_delete_store").classList.add("b_noevents");
+		document.getElementById("b_select_store").classList.add("b_noevents");
+	}
+	function enableStoreButton() {
+		document.getElementById("b_delete_store").classList.remove("b_noevents");
+		document.getElementById("b_select_store").classList.remove("b_noevents");
+	}
+
+	clearStore();
+	addStore('000836', 'ヴィド・フランス');
+	addStore('000837', '店舗Ａ');
+	addStore('000838', '店舗Ｂ');
+	addStore('000839', '店舗Ｃ');
+
+	function disableBSDELKey(e) {
+		if ((e.key == 'Delete') || (e.key == 'Backspace')) {
+			e.preventDefault();
+			return false;
+		}
+	}
+
+	function makeQR() {
+/*		result = convertStringToNumber(encKey);
+		if (result === false) {
+			alert('暗号化キーには数字20桁を入力してください');
+			return false;
+		}
+		if (encKey.length != 20) {
+			alert('暗号化キーには数字20桁を入力してください');
+			return false;
+		}
+		result = convertStringToNumber(cico_date);
+		if (result === false) {
+			alert('チェックインチェックアウト日付には数字8桁を入力してください');
+			return false;
+		}
+		if (cico_date.length != 8) {
+			alert('チェックインチェックアウト日付には数字8桁を入力してください');
+			return false;
+		}
+		result = convertStringToNumber(reservation_room_number);
+		if (result === false) {
+			alert('予約番号or部屋番号には数字6桁を入力してください');
+			return false;
+		}
+		if (reservation_room_number.length != 6) {
+			alert('予約番号or部屋番号には数字6桁を入力してください');
+			return false;
+		}
+		result = convertStringToNumber(issue_time);
+		if (result === false) {
+			alert('発行時間には数字6桁を入力してください');
+			return false;
+		}
+		if (issue_time.length != 6) {
+			alert('発行時間には数字6桁を入力してください');
+			return false;
+		}
+*/
+		//店舗名
+		storeName = $("#t_store_name").val();
+		storeName = "ヴィド・フランス　　　　　　　　";
+		//入力チェック
+		//sjis化
+		sjisStoreName = Encoding.convert(storeName, 'SJIS');
+		
+		//サイトコード
+		siteCode = $("#t_site_code").val();
+		siteCode = "000836";
+		
+		//商品名
+		itemName = $("#t_item_name").val();
+		itemName = "ゴディパンのベルギーチョコレートのクリームパン（１０個詰め）　　";
+		//入力チェック
+		//sjis化
+		sjisItemName = Encoding.convert(itemName, 'SJIS');
+		
+		//商品説明
+		itemDesc = $("#t_item_desc").val();
+		//入力チェック
+		//sjis化
+		sjisItemDesc = Encoding.convert(itemDesc, 'SJIS');
+		
+		//商品価格
+		itemPrice = $("#t_item_price").val();
+		itemPrice = "01000";
+		
+		//賞味期限
+		expirationDate = $("#d_expiration_date").val() + $("#t_expiration_date_hour").val() + $("#t_expiration_date_min").val();
+		expirationDate = "202401241835"
+
+		//値引き日時
+		discountDate = $("#d_discount_date").val() + $("#t_discount_date_hour").val() + $("#t_discount_date_min").val();
+		discountDate = "111111111705"
+		
+		//値引き後の価格
+		itemPriceDiscount = $("#t_item_price_discount").val();
+		itemPriceDiscount = "00980";
+		
+
+		//QRコード生成
+		var data = '@' + siteCode + itemPrice + itemPriceDiscount + expirationDate + discountDate + sjisStoreName + sjisItemName + sjisItemDesc;
+//		var data = Encoding.convert($('#t_store_name').val(), 'SJIS')
+		$("#img-qr").html("");
+		$("#img-qr").qrcode({text:data});
+
+		modal = document.getElementById('modal_qrcode');
+		btnClose = document.getElementById('b_close_qrcode');
+		modal.classList.add('active');
+		document.querySelector('body').classList.add('modal-opened');
+		btnClose.addEventListener('click', function() {
+			modal.classList.remove('active');
+			document.querySelector('body').classList.remove('modal-opened'); 
+		}, false);
+	}
+
+	function saveSample() {
+		localStorage.setItem('sampleText', document.getElementById("sampleText").value);
+	}
+	function loadSample() {
+		document.getElementById("sampleText").value = localStorage.getItem('sampleText');
+	}
+	</script>
+	</div>
+</body>
+</html>
